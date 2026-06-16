@@ -371,9 +371,10 @@
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
   .cursor::after { content:'|'; animation: blink .7s infinite; margin-left: 1px; }
 
-  /* step label badge */
+  /* step label badge — top center of screen */
   .step-badge {
-    position: fixed; bottom: 16px; right: 16px; z-index: 200;
+    position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+    z-index: 200;
     background: rgba(16,163,127,.9); color: #fff;
     padding: 6px 14px; border-radius: 20px;
     font-size: .78rem; font-weight: 600;
@@ -381,12 +382,29 @@
     transition: opacity .3s;
     white-space: nowrap;
   }
+
+  /* send-button pulsing glow */
+  @keyframes sendGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16,163,127,0); }
+    50%       { box-shadow: 0 0 0 8px rgba(16,163,127,0.45); }
+  }
+  .send-btn-pulse {
+    animation: sendGlow 1.2s ease-in-out infinite;
+    background: #10a37f !important;
+  }
+
+  /* launch-button pulsing glow */
+  @keyframes launchGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16,163,127,0); }
+    50%       { box-shadow: 0 0 14px 5px rgba(16,163,127,0.55); }
+  }
+  .launch-btn-pulse {
+    animation: launchGlow 1.4s ease-in-out infinite;
+  }
 </style>
 </head>
 <body>
 
-<!-- Step badge -->
-<div class="step-badge" id="step-badge">Step 1 of 5</div>
 
 <!-- ── WELCOME SCREEN ── -->
 <div id="welcome-screen">
@@ -403,6 +421,9 @@
     <button id="welcome-btn" onclick="startSimulation()">Begin Simulation →</button>
   </div>
 </div>
+
+<!-- Step badge -->
+<div class="step-badge" id="step-badge">Step 1 of 5</div>
 
 <!-- ── APP ── -->
 <div id="app">
@@ -564,7 +585,7 @@
       </div>
       <div class="ready-title">Your Agent is Ready! 🎉</div>
       <div class="ready-sub" id="ready-sub">Your personal AI agent has been built and is ready to help.</div>
-      <button class="action-btn primary" style="font-size:1rem;padding:12px 32px" onclick="launchAgent()">
+      <button class="action-btn primary" id="launch-agent-btn" style="font-size:1rem;padding:12px 32px" onclick="launchAgent()">
         🚀 Launch Agent
       </button>
     </div>
@@ -759,6 +780,12 @@ document.getElementById('agent-describe-input').addEventListener('keydown', e =>
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitAgentDescription(); }
 });
 
+document.getElementById('agent-describe-input').addEventListener('input', () => {
+  const btn = document.getElementById('agent-submit-btn');
+  const hasText = document.getElementById('agent-describe-input').value.trim().length > 0;
+  btn.classList.toggle('send-btn-pulse', hasText);
+});
+
 /* ─── STEP 4: RESPONSE SCREEN ───────────────────────── */
 function buildResponseScreen(userText) {
   const msgContainer = document.getElementById('chat-messages');
@@ -810,6 +837,9 @@ function typeText(targetId, text, speed, onDone) {
       // handle **bold**
       el.innerHTML = rendered.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
       i++;
+      // auto-scroll so latest text stays centred in view
+      const chatMsgs = document.getElementById('chat-messages');
+      if (chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight;
     } else {
       clearInterval(interval);
       el.classList.remove('cursor');
@@ -883,6 +913,7 @@ function buildReadyScreen() {
 
   showScreen('screen-ready');
   setBadge(4);
+  document.getElementById('launch-agent-btn').classList.add('launch-btn-pulse');
 
   // ── AUDIO TRIGGER: Step 5 ──────────────────────────────
   // SL360 variable: "audio_step5"

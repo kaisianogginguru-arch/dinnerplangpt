@@ -401,6 +401,18 @@
   .launch-btn-pulse {
     animation: launchGlow 1.4s ease-in-out infinite;
   }
+
+  /* start-building button pulsing glow */
+  @keyframes startBuildGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16,163,127,0); transform: scale(1); }
+    50%       { box-shadow: 0 0 16px 6px rgba(16,163,127,0.6); transform: scale(1.03); }
+  }
+  #btn-start-building:not(:disabled) {
+    animation: startBuildGlow 1.4s ease-in-out infinite;
+  }
+  #btn-start-building:not(:disabled):hover {
+    animation-play-state: paused;
+  }
 </style>
 </head>
 <body>
